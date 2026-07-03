@@ -33,8 +33,8 @@ public:
     void paint(juce::Graphics& g) override
     {
         auto b = getLocalBounds().toFloat();
-        juce::ColourGradient bg(Colours::topPanelStart, 0, 0,
-                                Colours::topPanelEnd, 0, b.getHeight(), false);
+        juce::ColourGradient bg(Colours::topPanelStart, 0.0f, 0.0f,
+                                Colours::topPanelEnd, 0.0f, b.getHeight(), false);
         g.setGradientFill(bg);
         g.fillRect(b);
 
@@ -56,12 +56,12 @@ public:
         float glow1 = 0.5f + 0.5f * std::sin(phase);
         float glow2 = 0.5f + 0.5f * std::sin(phase + juce::MathConstants<float>::pi);
 
-        drawCube(g, {{150,38},{185,58},{150,78},{115,58}},
-                    {{150,96},{185,116},{150,136},{115,116}},
+        drawCube(g, {{150.0f,38.0f},{185.0f,58.0f},{150.0f,78.0f},{115.0f,58.0f}},
+                    {{150.0f,96.0f},{185.0f,116.0f},{150.0f,136.0f},{115.0f,116.0f}},
                     breath1, trans1, 1.8f, glow1);
 
-        drawCube(g, {{255,54},{276,66},{255,78},{234,66}},
-                    {{255,86},{276,98},{255,110},{234,98}},
+        drawCube(g, {{255.0f,54.0f},{276.0f,66.0f},{255.0f,78.0f},{234.0f,66.0f}},
+                    {{255.0f,86.0f},{276.0f,98.0f},{255.0f,110.0f},{234.0f,98.0f}},
                     breath2, trans2, 1.5f, glow2);
     }
 
@@ -85,7 +85,7 @@ private:
         for (auto& p : top) cen += p;
         cen /= (float)top.size();
 
-        auto t = juce::AffineTransform::translation(0, ty)
+        auto t = juce::AffineTransform::translation(0.0f, ty)
                              .translated(cen.x, cen.y)
                              .scaled(breath, breath)
                              .translated(-cen.x, -cen.y);
@@ -196,7 +196,7 @@ public:
         auto b = getLocalBounds().toFloat();
         g.setFont(juce::Font(8.0f, juce::Font::bold));
         g.setColour(juce::Colour(0xff4a5568));
-        g.drawText("AUTO", b.removeFromTop(b.getHeight() / 2), juce::Justification::topRight);
+        g.drawText("AUTO", b.removeFromTop(b.getHeight() / 2.0f), juce::Justification::topRight);
         g.drawText("GAIN", b, juce::Justification::topRight);
 
         auto ind = getLocalBounds().removeFromRight(18).withHeight(11).translated(-2, 4).toFloat();
@@ -248,7 +248,7 @@ public:
 
     void paint(juce::Graphics& g) override
     {
-        auto b = getLocalBounds().toFloat().reduced(2);
+        auto b = getLocalBounds().toFloat().reduced(2.0f);
         auto c = b.getCentre();
         // Exact scaled radius: 28 * (66/70) ≈ 26.4
         float r = 26.4f;
@@ -328,11 +328,15 @@ public:
     {
         auto b = getLocalBounds().toFloat();
 
-        // Dashed track
-        juce::Path track; track.addEllipse(b.reduced(2));
+        // Dashed track — FIX: use createDashedStroke, not strokePath with dash args
+        juce::Path track;
+        track.addEllipse(b.reduced(2.0f));
+        juce::PathStrokeType stroke(1.0f);
         float dl[] = { 3.0f, 3.0f };
+        juce::Path dashedTrack;
+        stroke.createDashedStroke(dashedTrack, track, dl, 2);
         g.setColour(juce::Colour(0x73a0aec0));
-        g.strokePath(track, juce::PathStrokeType(1.0f), dl, 2);
+        g.strokePath(dashedTrack, stroke);
 
         // Knob body
         int ks = large ? 58 : 44;
@@ -355,7 +359,7 @@ public:
         g.setColour(juce::Colours::white.withAlpha(0.85f));
         g.drawEllipse(kb.reduced(1.5f), 1.0f);
         g.setColour(juce::Colours::black.withAlpha(0.15f));
-        g.drawEllipse(kb.translated(0, 0.5f), 1.0f);
+        g.drawEllipse(kb.translated(0.0f, 0.5f), 1.0f);
 
         // Pointer
         float ang = juce::jmap(value, -135.0f, 135.0f)
@@ -479,13 +483,13 @@ private:
     void drawBrightness(juce::Graphics& g, juce::Rectangle<float> b)
     {
         // Circle mask
-        juce::Path mask; mask.addEllipse(b.reduced(2));
+        juce::Path mask; mask.addEllipse(b.reduced(2.0f));
         g.saveState(); g.reduceClipRegion(mask);
 
         // Horizontal stripes
         for (int i = 0; i < 9; ++i)
         {
-            float y = b.getY() + 8 + i * 3;
+            float y = b.getY() + 8.0f + i * 3.0f;
             g.drawLine(b.getX(), y, b.getRight(), y, 1.5f);
         }
         g.restoreState();
@@ -493,11 +497,11 @@ private:
         // Vertical slit (the mask line in HTML)
         g.setColour(Colours::bottomPanel); // erase with background colour
         float sx = b.getCentreX();
-        g.drawLine(sx, b.getY() + 2, sx, b.getBottom() - 2, 1.8f);
+        g.drawLine(sx, b.getY() + 2.0f, sx, b.getBottom() - 2.0f, 1.8f);
 
         // Outline
         g.setColour((state || hover) ? Colours::accent : juce::Colour(0xff3e4857));
-        g.drawEllipse(b.reduced(2), 1.5f);
+        g.drawEllipse(b.reduced(2.0f), 1.5f);
     }
 
     void drawColor(juce::Graphics& g, juce::Rectangle<float> b)
@@ -532,14 +536,14 @@ private:
         };
 
         float sc = b.getWidth() / 40.0f;
-        g.fillPath(star({b.getCentreX(), b.getY() + 10 * sc}, 3.5f * sc * 1.1f));
-        g.fillPath(star({b.getX() + 14 * sc, b.getY() + 18 * sc}, 3.5f * sc * 0.85f));
-        g.fillPath(star({b.getRight() - 14 * sc, b.getY() + 19 * sc}, 3.5f * sc * 0.95f));
-        g.fillPath(star({b.getCentreX(), b.getY() + 27 * sc}, 3.5f * sc * 1.15f));
-        g.fillPath(star({b.getX() + 12 * sc, b.getY() + 12 * sc}, 3.5f * sc * 0.6f));
-        g.fillPath(star({b.getRight() - 12 * sc, b.getY() + 11 * sc}, 3.5f * sc * 0.6f));
-        g.fillPath(star({b.getX() + 12 * sc, b.getY() + 25 * sc}, 3.5f * sc * 0.6f));
-        g.fillPath(star({b.getRight() - 12 * sc, b.getY() + 26 * sc}, 3.5f * sc * 0.65f));
+        g.fillPath(star({b.getCentreX(), b.getY() + 10.0f * sc}, 3.5f * sc * 1.1f));
+        g.fillPath(star({b.getX() + 14.0f * sc, b.getY() + 18.0f * sc}, 3.5f * sc * 0.85f));
+        g.fillPath(star({b.getRight() - 14.0f * sc, b.getY() + 19.0f * sc}, 3.5f * sc * 0.95f));
+        g.fillPath(star({b.getCentreX(), b.getY() + 27.0f * sc}, 3.5f * sc * 1.15f));
+        g.fillPath(star({b.getX() + 12.0f * sc, b.getY() + 12.0f * sc}, 3.5f * sc * 0.6f));
+        g.fillPath(star({b.getRight() - 12.0f * sc, b.getY() + 11.0f * sc}, 3.5f * sc * 0.6f));
+        g.fillPath(star({b.getX() + 12.0f * sc, b.getY() + 25.0f * sc}, 3.5f * sc * 0.6f));
+        g.fillPath(star({b.getRight() - 12.0f * sc, b.getY() + 26.0f * sc}, 3.5f * sc * 0.65f));
     }
 };
 
@@ -680,23 +684,30 @@ void DelayAudioProcessorEditor::paint(juce::Graphics& g)
 
     // Inset top highlight
     g.setColour(juce::Colours::white.withAlpha(0.8f));
-    g.drawLine(1, 1, b.getWidth() - 1, 1, 1.0f);
+    g.drawLine(1.0f, 1.0f, b.getWidth() - 1.0f, 1.0f, 1.0f);
+
+    // Top panel
+    juce::Rectangle<float> top(0.0f, 0.0f, b.getWidth(), 160.0f);
+    juce::ColourGradient tg(Colours::topPanelStart, 0.0f, 0.0f,
+                            Colours::topPanelEnd, 0.0f, 160.0f, false);
+    g.setGradientFill(tg);
+    g.fillRect(top);
 
     // Mid bar
-    juce::Rectangle<float> mid(0, 160, b.getWidth(), 38);
+    juce::Rectangle<float> mid(0.0f, 160.0f, b.getWidth(), 38.0f);
     g.setColour(Colours::midBar);
     g.fillRect(mid);
     g.setColour(juce::Colour(0xffe1e4e8));
-    g.drawLine(0, 198, b.getWidth(), 198, 1.0f);
+    g.drawLine(0.0f, 198.0f, b.getWidth(), 198.0f, 1.0f);
 
-    // Bottom panel
+    // Bottom panel — FIX: all float arguments to avoid overload ambiguity
     g.setColour(Colours::bottomPanel);
-    g.fillRect(0, 198, b.getWidth(), b.getHeight() - 198);
+    g.fillRect(0.0f, 198.0f, b.getWidth(), b.getHeight() - 198.0f);
 
     // Right divider
     float rx = b.getWidth() * 0.78f;
     g.setColour(juce::Colour(0xffe1e4e8));
-    g.drawLine(rx, 198, rx, b.getHeight(), 1.0f);
+    g.drawLine(rx, 198.0f, rx, b.getHeight(), 1.0f);
 
     // Mode labels — exact mid-bar padding 0 24px
     bool creative = dynamic_cast<juce::AudioParameterBool*>(processor.getAPVTS().getParameter("mode"))->get();
